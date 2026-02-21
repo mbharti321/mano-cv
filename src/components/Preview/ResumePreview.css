@@ -69,7 +69,7 @@
 }
 
 .resume-link {
-    /* color: var(--link-color); */
+    color: var(--link-color);
     text-decoration: none;
 }
 
@@ -85,14 +85,14 @@
     color: var(--accent-color);
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 4px;
+    /* margin-bottom: 4px; */
 }
 
 .section-rule {
     height: 1.5px;
     background: var(--section-line-color);
     opacity: .9;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
 }
 
 /* text section */
@@ -136,7 +136,7 @@
 }
 
 .exp-bullets {
-    margin-left: 20px;
+    margin-left: var(--bullet-margin);;
     margin-top: 2px;
 }
 
@@ -144,7 +144,7 @@
 .proj-bullets,
 .edu-desc+ul,
 .exp-bullets {
-    margin-left: 20px;
+    margin-left: var(--bullet-margin);
 }
 
 .exp-title {
@@ -165,7 +165,7 @@
 }
 
 .exp-bullets {
-    margin-left: 14px;
+    margin-left: var(--bullet-margin);
     margin-top: 2px;
 }
 
@@ -193,7 +193,7 @@
 }
 
 .proj-bullets {
-    margin-left: 14px;
+    margin-left: var(--bullet-margin);
     margin-top: 2px;
 }
 
@@ -242,6 +242,8 @@
 
 /* publications */
 .pub-item {
+    display: flex;
+    justify-content: space-between;
     margin-bottom: 4px;
     font-size: var(--font-size);
 }

@@ -22,6 +22,7 @@ export default function ResumePreview({ resume, custom }) {
     "--section-line-color": C.sectionLineColor,
     "--heading-size": px(C.headingSize) + "px",
     "--heading-weight": C.headingWeight,
+    "--bullet-margin": px(C.bulletMargin) + "px",
   };
 
   const p = resume.personal;
@@ -236,19 +237,21 @@ function SectionPreview({ sec }) {
           .filter((i) => i.visible)
           .map((i) => (
             <div key={i.id} className="pub-item">
-              <span className="pub-title">
-                {i.url ? (
-                  <a className="resume-link" href={i.url}>
-                    {i.title}
-                  </a>
-                ) : (
-                  i.title
+              <div className="pub-header">
+                <span className="pub-title">
+                  {i.url ? (
+                    <a className="resume-link" href={i.url}>
+                      {i.title}
+                    </a>
+                  ) : (
+                    i.title
+                  )}
+                </span>
+                {i.publisher && (
+                  <span className="pub-meta"> — {i.publisher}</span>
                 )}
-              </span>
-              {i.publisher && (
-                <span className="pub-meta"> — {i.publisher}</span>
-              )}
-              {i.date && <span className="pub-meta">, {i.date}</span>}
+              </div>
+              <div>{i.date && <span className="pub-meta"> {i.date}</span>}</div>
             </div>
           ))}
       </div>
