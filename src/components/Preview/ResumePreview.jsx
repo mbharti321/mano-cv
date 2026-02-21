@@ -27,28 +27,8 @@ export default function ResumePreview({ resume, custom }) {
 
   const p = resume.personal;
 
-  // measure height so we can draw page‐break lines in the preview
-  const paperRef = React.useRef(null);
-  const [pages, setPages] = React.useState(1);
-  React.useEffect(() => {
-    if (paperRef.current) {
-      const h = paperRef.current.scrollHeight;
-      const count = Math.max(1, Math.ceil(h / 1123));
-      setPages(count);
-    }
-  }, [resume, custom]);
-
   return (
-    <div className="resume-paper" style={rootStyle} ref={paperRef}>
-      {/* draw separators on-screen only */}
-      {[...Array(pages - 1)].map((_, idx) => (
-        <div
-          key={idx}
-          className="page-break-line"
-          style={{ top: (idx + 1) * 1123 + "px" }}
-        />
-      ))}
-
+    <div className="resume-paper" style={rootStyle}>
       {/* Header */}
       <div className="resume-header">
         <div className="resume-name">
@@ -280,22 +260,21 @@ function SectionPreview({ sec }) {
   if (sec.type === "list")
     return (
       <div className="sec-list">
-        <ul>
-          {sec.items
-            .filter((i) => i.visible)
-            .map((i) => (
-              <li key={i.id} className="list-item">
-                {i.url ? (
-                  <a className="resume-link" href={i.url}>
-                    {i.text}
-                  </a>
-                ) : (
-                  i.text
-                )}
-                {i.source && <span className="list-source"> ({i.source})</span>}
-              </li>
-            ))}
-        </ul>
+        {sec.items
+          .filter((i) => i.visible)
+          .map((i) => (
+            <div key={i.id} className="list-item">
+              •{" "}
+              {i.url ? (
+                <a className="resume-link" href={i.url}>
+                  {i.text}
+                </a>
+              ) : (
+                i.text
+              )}
+              {i.source && <span className="list-source"> ({i.source})</span>}
+            </div>
+          ))}
       </div>
     );
 

@@ -26,31 +26,31 @@
     font-size: var(--font-size);
     line-height: var(--line-height);
     color: var(--color);
-    /* ensure at least one page height for preview and allow page-boundary lines */
-    min-height: 1123px; /* ~297mm at 3.7795px/mm */
-    position: relative; /* container for absolute lines */
+    /* use flex to stack content and separators */
+    display: flex;
+    flex-direction: column;
+    position: relative;
 }
 
-.page-break-line {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background: rgba(0,0,0,0.25);
+.resume-content {
+    /* first page content */
+    flex: 0 0 auto;
 }
 
-/* show faint page boundaries in the on‑screen preview so users can see
-   when the resume will span multiple pages */
-@media screen {
+.page-break-separator {
+    /* visible gap between pages in preview only */
+    height: 20px;
+    background: #e0ddd8;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+@media print {
     .resume-paper {
-        background-image: repeating-linear-gradient(
-            to bottom,
-            transparent,
-            transparent 1122px,
-            rgba(0,0,0,0.1) 1122px,
-            rgba(0,0,0,0.1) 1123px
-        );
-        background-size: 100% 1123px;
+        display: block; /* revert to normal for printing */
+    }
+    .page-break-separator {
+        display: none; /* hide separators in PDF */
     }
 }
 /* header */

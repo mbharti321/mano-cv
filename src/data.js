@@ -491,7 +491,7 @@ export const DFLT_CUSTOM = {
   marginX: 12,
   marginY: 12,
   accentColor: "#0b111b",
-  linkColor: "#042062",
+  linkColor: "#010d29",
   sectionLineColor: "#161e2b",
   nameColor: "#000000",
   dateColor: "#1c2127",
