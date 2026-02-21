@@ -1,0 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans&family=Lora&family=Source+Serif+4&family=IBM+Plex+Sans&family=Crimson+Pro&family=DM+Sans&family=Nunito&family=Raleway&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0ede8;color:#1a1a2e;-webkit-font-smoothing:antialiased}
+input,textarea,select,button{font-family:inherit}
+button{cursor:pointer}

@@ -1,0 +1,14 @@
+/* Toolbar component styles */
+.toolbar{display:flex;align-items:center;gap:6px;padding:0 14px;height:52px;min-height:52px;background:#fff;border-bottom:1px solid #e8e5e0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.logo{font-size:16px;font-weight:800;letter-spacing:-0.5px;color:#1a1a2e;margin-right:6px;white-space:nowrap}
+.logo span{color:#e84393}
+.sep{width:1px;height:24px;background:#e8e5e0;margin:0 2px}
+.tb-btn{display:flex;align-items:center;gap:5px;padding:6px 11px;border-radius:8px;border:none;font-size:12.5px;font-weight:500;background:transparent;color:#4a4a6a;transition:all .15s;white-space:nowrap}
+.tb-btn:hover{background:#f5f3f0;color:#1a1a2e}
+.tb-btn:disabled{opacity:.35;cursor:not-allowed}
+.tb-btn.primary{background:linear-gradient(135deg,#e84393,#d63585);color:#fff;box-shadow:0 2px 8px rgba(232,67,147,.3)}
+.tb-btn.primary:hover{background:linear-gradient(135deg,#d63585,#c42d78);box-shadow:0 3px 12px rgba(232,67,147,.4)}
+.tb-btn.secondary{border:1.5px solid #e8e5e0}
+.tb-btn.secondary:hover{border-color:#aaa}
+.tb-btn.active{background:#fff0f7;color:#e84393;border:1.5px solid #f9d0e8}
+.tr{margin-left:auto;display:flex;align-items:center;gap:5px}

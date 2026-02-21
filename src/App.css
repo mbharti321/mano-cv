@@ -1,0 +1,11 @@
+/* global layout classes */
+.app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.app-body{display:flex;flex:1;overflow:hidden}
+
+/* preview and paper handled in ResumePreview.css */
+
+/* generic modal/btn/icon rules already moved to AddSectionModal.css */
+
+/* make sure imported component CSS has priority */
+
+/* keep any global helpers if needed in future */

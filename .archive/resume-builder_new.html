@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ResumeForge — Resume Builder</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:wght@700;800&family=Lora:wght@400;600;700&family=Source+Serif+4:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=Nunito:wght@300;400;600;700&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0ede8;color:#1a1a2e;-webkit-font-smoothing:antialiased}
+input,textarea,select,button{font-family:inherit}
+button{cursor:pointer}
+
+.app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+/* TOOLBAR */
+.toolbar{display:flex;align-items:center;gap:6px;padding:0 14px;height:52px;min-height:52px;background:#fff;border-bottom:1px solid #e8e5e0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.logo{font-size:16px;font-weight:800;letter-spacing:-0.5px;color:#1a1a2e;margin-right:6px;white-space:nowrap}
+.logo span{color:#e84393}
+.sep{width:1px;height:24px;background:#e8e5e0;margin:0 2px}
+.tb-btn{display:flex;align-items:center;gap:5px;padding:6px 11px;border-radius:8px;border:none;font-size:12.5px;font-weight:500;background:transparent;color:#4a4a6a;transition:all .15s;white-space:nowrap}
+.tb-btn:hover{background:#f5f3f0;color:#1a1a2e}
+.tb-btn:disabled{opacity:.35;cursor:not-allowed}
+.tb-btn.primary{background:linear-gradient(135deg,#e84393,#d63585);color:#fff;box-shadow:0 2px 8px rgba(232,67,147,.3)}
+.tb-btn.primary:hover{background:linear-gradient(135deg,#d63585,#c42d78);box-shadow:0 3px 12px rgba(232,67,147,.4)}
+.tb-btn.secondary{border:1.5px solid #e8e5e0}
+.tb-btn.secondary:hover{border-color:#aaa}
+.tb-btn.active{background:#fff0f7;color:#e84393;border:1.5px solid #f9d0e8}
+.tr{margin-left:auto;display:flex;align-items:center;gap:5px}
+
+/* BODY */
+.app-body{display:flex;flex:1;overflow:hidden}
+
+/* LEFT PANEL */
+.left-panel{width:310px;min-width:310px;display:flex;flex-direction:column;background:#fff;border-right:1px solid #e8e5e0;overflow:hidden}
+.panel-tabs{display:flex;border-bottom:2px solid #f0ede8;padding:0 10px}
+.panel-tab{padding:11px 13px;font-size:12.5px;font-weight:500;color:#888;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+.panel-tab.active{color:#e84393;border-bottom-color:#e84393}
+.panel-tab:hover:not(.active){color:#1a1a2e}
+.panel-content{flex:1;overflow-y:auto;padding:10px}
+.panel-content::-webkit-scrollbar{width:4px}
+.panel-content::-webkit-scrollbar-thumb{background:#e0ddd8;border-radius:4px}
+
+/* SECTION ROWS */
+.section-row{border:1.5px solid #eee;border-radius:10px;margin-bottom:7px;overflow:hidden;background:#fff;transition:border-color .15s}
+.section-row.expanded{border-color:#e84393}
+.section-header{display:flex;align-items:center;gap:6px;padding:9px 11px;background:#fff;user-select:none}
+.section-header:hover{background:#fdfcfb}
+.drag-icon{color:#ccc;font-size:13px;cursor:grab}
+.eye-btn{background:none;border:none;padding:2px 4px;color:#bbb;font-size:15px;cursor:pointer;border-radius:4px;transition:all .15s;line-height:1}
+.eye-btn:hover{background:#f5f3f0;color:#e84393}
+.eye-btn.off{color:#ddd}
+.sec-title-input{flex:1;font-size:13px;font-weight:600;border:none;outline:none;background:transparent;color:#1a1a2e;cursor:pointer}
+.sec-title-input.dimmed{color:#ccc}
+.chevron{color:#bbb;font-size:11px;transition:transform .2s}
+.chevron.open{transform:rotate(180deg)}
+.del-btn{background:none;border:none;padding:2px 4px;color:#e0ddd8;font-size:14px;cursor:pointer;border-radius:4px;transition:all .15s;line-height:1}
+.del-btn:hover{color:#e84393;background:#fff0f7}
+.section-body{padding:10px 11px 12px;border-top:1px solid #f5f3f0}
+.section-body:empty{display:none}
+
+/* FORMS */
+.fg{margin-top:9px}
+.fl{display:block;font-size:10.5px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.fi{width:100%;padding:6px 9px;border:1.5px solid #e8e5e0;border-radius:7px;font-size:12.5px;color:#1a1a2e;background:#fafafa;outline:none;transition:border-color .15s}
+.fi:focus{border-color:#e84393;background:#fff}
+.fta{width:100%;padding:8px 9px;border:1.5px solid #e8e5e0;border-radius:7px;font-size:12.5px;color:#1a1a2e;background:#fafafa;outline:none;resize:vertical;min-height:80px;line-height:1.5;transition:border-color .15s}
+.fta:focus{border-color:#e84393;background:#fff}
+.frow{display:flex;gap:7px}
+.frow .fg{flex:1;margin-top:9px}
+
+/* ITEM CARDS */
+.icard{border:1px solid #eee;border-radius:8px;margin-top:7px;overflow:hidden}
+.icard-hd{display:flex;align-items:center;gap:6px;padding:7px 10px;background:#f9f9f9;cursor:pointer;font-size:12px;font-weight:600;color:#555}
+.icard-hd:hover{background:#f5f3f0}
+.icard-body{padding:10px}
+
+/* BULLETS */
+.bullet-row{display:flex;align-items:flex-start;gap:5px;margin-bottom:5px;padding:5px 7px;border:1px solid #eee;border-radius:6px;background:#fff}
+.bullet-row:hover{border-color:#ddd}
+.bullet-row.off{opacity:.45}
+.btext{flex:1;font-size:11.5px;border:none;outline:none;resize:none;background:transparent;line-height:1.45;min-height:32px}
+.bicon-btn{background:none;border:none;cursor:pointer;color:#ccc;font-size:12px;padding:1px;line-height:1;flex-shrink:0;margin-top:2px}
+.bicon-btn:hover{color:#e84393}
+
+/* SKILL/LIST ROWS */
+.skill-row{display:flex;align-items:center;gap:5px;margin-bottom:5px}
+.sk-label{width:40%;padding:5px 7px;border:1.5px solid #eee;border-radius:6px;font-size:11.5px;font-weight:600;outline:none;background:#fafafa}
+.sk-label:focus{border-color:#e84393}
+.sk-val{flex:1;padding:5px 7px;border:1.5px solid #eee;border-radius:6px;font-size:11.5px;outline:none;background:#fafafa}
+.sk-val:focus{border-color:#e84393}
+.list-row{display:flex;align-items:center;gap:5px;margin-bottom:5px}
+.list-row .fi{font-size:11.5px;padding:5px 7px}
+
+.add-btn{width:100%;padding:7px;margin-top:7px;border:1.5px dashed #ddd;border-radius:7px;background:transparent;color:#bbb;font-size:12px;cursor:pointer;transition:all .15s}
+.add-btn:hover{border-color:#e84393;color:#e84393;background:#fff0f7}
+.add-section-btn{width:100%;padding:10px;margin-top:4px;border:1.5px dashed #e84393;border-radius:10px;background:transparent;color:#e84393;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+.add-section-btn:hover{background:#fff0f7}
+
+/* PERSONAL BLOCK */
+.personal-block{border:1.5px solid #f5f0f9;border-radius:10px;padding:11px;margin-bottom:8px;background:#fdfcfe}
+.pblock-title{font-size:10.5px;font-weight:700;color:#e84393;text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px}
+.link-row{display:flex;align-items:center;gap:5px;margin-bottom:5px}
+.link-row .fi{font-size:11.5px;padding:5px 7px}
+
+/* CUSTOMIZE */
+.cust-section{margin-bottom:14px}
+.cust-title{font-size:10.5px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:9px}
+.cust-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cust-row label{font-size:12px;color:#555;font-weight:500}
+.cust-row input[type=range]{width:120px;accent-color:#e84393}
+.cust-row span{font-size:11.5px;color:#888;min-width:34px;text-align:right}
+.cust-select{padding:5px 8px;border:1.5px solid #e8e5e0;border-radius:7px;font-size:12px;outline:none;background:#fafafa;font-family:inherit}
+.cust-select:focus{border-color:#e84393}
+.color-dot{width:28px;height:26px;border:1.5px solid #e8e5e0;border-radius:6px;padding:2px;cursor:pointer}
+
+/* JSON */
+.json-ta{width:100%;height:380px;padding:10px;border:1.5px solid #e8e5e0;border-radius:8px;font-family:'Courier New',monospace;font-size:11px;line-height:1.5;color:#333;background:#f8f8f8;resize:none;outline:none}
+.json-ta:focus{border-color:#e84393}
+
+/* PREVIEW */
+.preview-area{flex:1;background:#e0ddd8;overflow:auto;display:flex;flex-direction:column;align-items:center;padding:28px 20px;gap:24px}
+.preview-scale-note{font-size:12px;color:#888;text-align:center}
+
+.resume-paper{width:794px;min-width:794px;background:white;box-shadow:0 4px 28px rgba(0,0,0,.14),0 1px 4px rgba(0,0,0,.08);border-radius:2px}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:1000}
+.modal{background:white;border-radius:14px;padding:24px;width:400px;box-shadow:0 10px 50px rgba(0,0,0,.18)}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:16px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.btn{padding:7px 16px;border-radius:8px;border:none;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+.btn.pink{background:#e84393;color:#fff}
+.btn.pink:hover{background:#d63585}
+.btn.ghost{background:#f5f3f0;color:#555}
+.btn.ghost:hover{background:#eee}
+.btn.sm{padding:4px 10px;font-size:12px;border-radius:6px}
+
+/* INLINE BTNS */
+.icon-btn{background:none;border:none;cursor:pointer;padding:2px 4px;border-radius:5px;font-size:13px;color:#ccc;transition:all .15s;line-height:1}
+.icon-btn:hover{color:#e84393;background:#fff0f7}
+
+/* PRINT */
+@media print{
+  .toolbar,.left-panel,.preview-area{display:none!important}
+  body,.app,.app-body{display:block!important;width:auto!important;height:auto!important;overflow:visible!important;background:white!important}
+  .resume-paper{box-shadow:none!important;width:100%!important;min-width:unset!important}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useCallback,useRef,useEffect,useMemo}=React;
+const uid=()=>Math.random().toString(36).substr(2,9);
+const cl=v=>JSON.parse(JSON.stringify(v));
+
+/* ======================== INITIAL DATA ======================== */
+const INIT={
+  personal:{
+    name:"Manish Bharti",title:"Senior Software Engineer",
+    email:"manishbharti.work@gmail.com",phone:"+91 9955262206",location:"Bengaluru, India, 560038",
+    links:[
+      {id:"l1",label:"Website",text:"manishbharti.in",url:"https://manishbharti.in",visible:true},
+      {id:"l2",label:"LinkedIn",text:"linkedin.com/in/manish-bharti",url:"https://linkedin.com/in/manish-bharti",visible:true},
+      {id:"l3",label:"GitHub",text:"github.com/mbharti321",url:"https://github.com/mbharti321",visible:true},
+    ]
+  },
+  sections:[
+    {id:"profile",title:"Profile Summary",type:"text",visible:true,
+     content:"Software Engineer with 4+ years of experience building scalable backend and GenAI systems using Python, FastAPI, .NET, SQL, and Azure cloud. Proven experience delivering production-grade APIs, event-driven pipelines, and RAG-based AI platforms. Strong focus on performance, reliability, and cost optimization; experience collaborating across backend, AI, and frontend layers to deliver end-to-end production systems in high-volume logistics environments."},
+    {id:"skills",title:"Skills",type:"skills",visible:true,items:[
+      {id:"sk1",label:"Programming Languages",value:"Python, C#, JavaScript",visible:true},
+      {id:"sk2",label:"Backend Development",value:"FastAPI, .NET, SQL, REST APIs, Microservices, Redis, SQLAlchemy, OOP",visible:true},
+      {id:"sk3",label:"AI / GenAI",value:"Retrieval-Augmented Generation (RAG), Vector DB, Large Language Models (LLMs), Azure AI Search, LangChain, Agentic AI",visible:true},
+      {id:"sk4",label:"Cloud & Data",value:"Azure: Function App, ServiceBus, EventHub, Storage Account, AppConfig, Managed Identity; AWS Foundations",visible:true},
+      {id:"sk5",label:"DevOps & Monitoring",value:"Azure DevOps, CI/CD, Pipelines, GitHub, Application Insights, Opsgenie",visible:true},
+      {id:"sk6",label:"Frontend Development",value:"JavaScript, React, TypeScript, HTML, CSS",visible:true},
+      {id:"sk7",label:"Tools",value:"Jira, Git, Linux, Azure Synapse, PySpark, Postman",visible:true},
+    ]},
+    {id:"exp",title:"Work Experience",type:"experience",visible:true,items:[
+      {id:"e1",title:"Sr. Software Engineer",company:"Corestrat (Working for ACI Logistix, a logistics firm)",companyUrl:"",startDate:"Sep 2025",endDate:"Present",location:"Bengaluru",visible:true,bullets:[
+        {id:"b1",text:"Delivered a production Agentic-AI chatbot (ParcelAtlas) for logistics use cases, achieving 75% CSAT.",visible:true},
+        {id:"b2",text:"Built an in-house Non-Conveyable Scan facility, replacing a third-party tool, saving ~10% in revenue, and improving data visibility.",visible:true},
+        {id:"b3",text:"Fixed duplicate order failures for 5+ carriers, clearing 1,000+ packages from the daily DLQs and stabilizing downstream workflows.",visible:true},
+        {id:"b4",text:"Built and enhanced backend services and APIs supporting high-volume logistics operations processing 50K+ packages per day.",visible:true},
+      ]},
+      {id:"e2",title:"Software Engineer",company:"Corestrat (Working for ACI Logistix, a logistics firm)",companyUrl:"",startDate:"Sep 2022",endDate:"Aug 2025",location:"Bengaluru",visible:true,bullets:[
+        {id:"b5",text:"Built InfoBridge AI, a RAG-based chatbot for enterprise knowledge management using LLMs (GPT-4o). Reducing information lookup time by 70%.",visible:true},
+        {id:"b6",text:"Built a robust CI/CD workflow for SQL DB objects, ensuring full version control and reliable production deployments.",visible:true},
+        {id:"b7",text:"Designed and owned production-grade REST APIs for carrier overage webhooks, automating package handling and order creation, reducing manual intervention.",visible:true},
+        {id:"b8",text:"Ensured 100% uptime for facility operations applications via proactive Raspberry Pi (RPi) log monitoring.",visible:true},
+        {id:"b9",text:"Implemented USPS parcel postage optimization logic (SSF Priority), contributing to a ~10% improvement in profit margin on 5000+ daily parcels.",visible:true},
+        {id:"b10",text:"Developed a webhook and event service for real-time package event flow between couriers and service providers.",visible:true},
+        {id:"b11",text:"Designed and implemented a real-time package tracking system (BST 2.0), eliminating manual tracking errors and providing instant status updates.",visible:true},
+        {id:"b12",text:"Automated Cainiao ticket processing, eliminating manual effort and reducing task completion time by 100%.",visible:true},
+      ]},
+      {id:"e3",title:"Software Engineer Intern",company:"SysCloud & Telaverge Communications",companyUrl:"",startDate:"Dec 2021",endDate:"Aug 2022",location:"Bengaluru",visible:true,bullets:[
+        {id:"b13",text:"Created Node.js scripts to generate test data automatically, saving 100+ hours/month of manual work.",visible:true},
+        {id:"b14",text:"Collaborated with a team of 6 members to troubleshoot and debug bugs, ensuring smooth product functioning.",visible:true},
+        {id:"b15",text:"Developed the company's official website from its inception to launch, contributing to 50% of the project's implementation.",visible:true},
+      ]},
+    ]},
+    {id:"proj",title:"Projects",type:"projects",visible:true,items:[
+      {id:"p1",title:"ParcelAtlas",subtitle:"Agentic AI for Parcel Tracking",url:"",visible:true,bullets:[
+        {id:"pb1",text:"Built an agentic RAG chatbot for parcel tracking, proof-of-delivery explanation, and logistics ticket workflows.",visible:true},
+        {id:"pb2",text:"Implemented tool-based reasoning, evaluation, and safety guardrails to reduce hallucinations and ensure secure usage.",visible:true},
+        {id:"pb3",text:"Delivered a production system and met latency performance benchmarks.",visible:true},
+      ]},
+      {id:"p2",title:"Non-Conveyable Scan System",subtitle:"In-house Logistics Exception Handling Platform",url:"",visible:true,bullets:[
+        {id:"pb4",text:"Built an end-to-end scanning system (UI + APIs + integrations) to manage non-conveyable shipments.",visible:true},
+        {id:"pb5",text:"Replaced a third-party tool, reducing operational cost by ~10% annually.",visible:true},
+        {id:"pb6",text:"Integrated with warehouse systems and carrier APIs for real-time tracking.",visible:true},
+        {id:"pb7",text:"Improved data visibility by ~80%.",visible:true},
+      ]},
+      {id:"p3",title:"InfoBridge AI",subtitle:"Enterprise Knowledge Assistant (RAG)",url:"",visible:true,bullets:[
+        {id:"pb8",text:"Built an enterprise RAG app using GPT-4o that reduced information lookup time by 70% for 100+ internal users, processing queries across 2,000+ documents.",visible:true},
+        {id:"pb9",text:"Implemented role-based access control, production monitoring via Application Insights, and cost optimization strategies, reducing LLM API costs by 20%.",visible:true},
+        {id:"pb10",text:"Built a FastAPI backend for document ingestion, embeddings, authentication, and secure API integration with LLM providers.",visible:true},
+        {id:"pb11",text:"Designed a vector search pipeline using Azure AI Search for semantic retrieval across structured and unstructured data.",visible:true},
+      ]},
+      {id:"p4",title:"Carrier Overage Processing System",subtitle:"Automated Carrier Billing & Reconciliation Platform",url:"",visible:true,bullets:[
+        {id:"pb12",text:"Developed REST APIs and webhook services to automate carrier overage handling.",visible:true},
+        {id:"pb13",text:"Integrated USPS and logistics partner systems for real-time reconciliation.",visible:true},
+        {id:"pb14",text:"Reduced manual processing by 60%+ and improved billing accuracy by 25%+ meeting SLA accuracy.",visible:true},
+      ]},
+      {id:"p5",title:"CI/CD Pipeline for Database & SQL Object Versioning",subtitle:"Automating SQL Object Deployment with Version Control",url:"",visible:false,bullets:[
+        {id:"pb15",text:"Created a Database Project to structure and manage SQL objects efficiently.",visible:true},
+        {id:"pb16",text:"Implemented automated validation to prevent errors before deployment.",visible:true},
+        {id:"pb17",text:"Developed a CI/CD pipeline to automate SQL object versioning and deployment.",visible:true},
+      ]},
+      {id:"p6",title:"SSFPriority",subtitle:"Postage Calculation Optimization",url:"",visible:false,bullets:[
+        {id:"pb18",text:"Significantly enhanced postage calculation, a critical component of the parcel business.",visible:true},
+        {id:"pb19",text:"Developed a priority model for selecting package dimensions for USPS postage calculation.",visible:true},
+        {id:"pb20",text:"Achieved a notable 10% increase in profit margin by using measured dimensions.",visible:true},
+      ]},
+    ]},
+    {id:"edu",title:"Education",type:"education",visible:true,items:[
+      {id:"ed1",degree:"Master of Computer Application",school:"Christ University, Bangalore",schoolUrl:"",startDate:"Jul 2019",endDate:"Jul 2022",location:"Bengaluru",description:"",visible:true},
+      {id:"ed2",degree:"Bachelor of Computer Application",school:"SFS College, Electronic City, Bangalore",schoolUrl:"",startDate:"Jun 2016",endDate:"Jun 2019",location:"Bengaluru",description:"",visible:true},
+    ]},
+    {id:"pub",title:"Research Publication",type:"publications",visible:true,items:[
+      {id:"pu1",title:"Blockchain and Its Integration in IoT",publisher:"Springer",date:"Oct 2022",url:"",visible:true},
+    ]},
+    {id:"cert",title:"Certificates & Publications",type:"list",visible:true,items:[
+      {id:"c1",text:"Python And Django Framework For Beginners",source:"Udemy",url:"",visible:true},
+      {id:"c2",text:"AWS Academy Cloud Foundations",source:"AWS",url:"",visible:true},
+      {id:"c3",text:"Deep Learning Explained",source:"Microsoft | edX",url:"",visible:true},
+      {id:"c4",text:"The Complete 2022 Web Development Bootcamp",source:"Udemy",url:"",visible:true},
+      {id:"c5",text:"Java Programming: Solving Problems with Software",source:"Coursera",url:"",visible:true},
+      {id:"c6",text:"The Bits and Bytes of Computer",source:"Google | Coursera",url:"",visible:true},
+      {id:"c7",text:"The Unix Workbench",source:"Johns Hopkins University | Coursera",url:"",visible:true},
+    ]},
+  ]
+};
+
+const DFLT_CUSTOM={
+  fontFamily:"Plus Jakarta Sans",fontSize:10,nameSize:26,titleSize:12,headingSize:11.5,lineHeight:1.45,
+  marginX:20,marginY:18,accentColor:"#1e293b",linkColor:"#2563eb",sectionLineColor:"#1e293b",
+  nameColor:"#0f172a",dateColor:"#64748b",bulletColor:"#374151",headingWeight:"700"
+};
+
+const FONTS=["Plus Jakarta Sans","Lora","Source Serif 4","IBM Plex Sans","Crimson Pro","DM Sans","Nunito","Raleway","Georgia","Times New Roman"];
+
+/* ======================== HISTORY HOOK ======================== */
+function useHistory(init){
+  const hist=useRef([cl(init)]);
+  const idx=useRef(0);
+  const[,tick]=useState(0);
+  const rerender=()=>tick(n=>n+1);
+  const current=hist.current[idx.current];
+  const push=useCallback(s=>{
+    hist.current=hist.current.slice(0,idx.current+1);
+    hist.current.push(cl(s));
+    if(hist.current.length>80)hist.current.shift();
+    idx.current=hist.current.length-1;
+    rerender();
+  },[]);
+  const undo=useCallback(()=>{if(idx.current>0){idx.current--;rerender();}},[]);
+  const redo=useCallback(()=>{if(idx.current<hist.current.length-1){idx.current++;rerender();}},[]);
+  return{current,push,undo,redo,canUndo:idx.current>0,canRedo:idx.current<hist.current.length-1};
+}
+
+/* ======================== APP ======================== */
+function App(){
+  const{current:resume,push:pushResume,undo,redo,canUndo,canRedo}=useHistory(INIT);
+  const[custom,setCustom]=useState(DFLT_CUSTOM);
+  const[tab,setTab]=useState("sections");
+  const[addModal,setAddModal]=useState(false);
+  const[jsonText,setJsonText]=useState("");
+
+  const update=useCallback(fn=>{
+    const next=cl(resume);
+    fn(next);
+    pushResume(next);
+  },[resume,pushResume]);
+
+  useEffect(()=>{
+    const handler=e=>{
+      if((e.ctrlKey||e.metaKey)&&e.key==="z"&&!e.shiftKey){e.preventDefault();undo();}
+      if((e.ctrlKey||e.metaKey)&&(e.key==="y"||(e.key==="z"&&e.shiftKey))){e.preventDefault();redo();}
+    };
+    window.addEventListener("keydown",handler);
+    return()=>window.removeEventListener("keydown",handler);
+  },[undo,redo]);
+
+  useEffect(()=>{
+    if(tab==="json")setJsonText(JSON.stringify({resume,customization:custom},null,2));
+  },[tab]);
+
+  const exportJSON=()=>{
+    const b=new Blob([JSON.stringify({resume,customization:custom},null,2)],{type:"application/json"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(b);
+    a.download=`${resume.personal.name.replace(/\s+/g,"-")}-resume.json`;a.click();
+  };
+  const createCopy=()=>{
+    const b=new Blob([JSON.stringify({resume,customization:custom},null,2)],{type:"application/json"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(b);
+    a.download=`${resume.personal.name.replace(/\s+/g,"-")}-copy-${Date.now()}.json`;a.click();
+  };
+  const importJSON=()=>{
+    const inp=document.createElement("input");inp.type="file";inp.accept=".json";
+    inp.onchange=e=>{
+      const f=e.target.files[0];if(!f)return;
+      const r=new FileReader();
+      r.onload=ev=>{
+        try{
+          const d=JSON.parse(ev.target.result);
+          if(d.resume)pushResume(d.resume);
+          if(d.customization)setCustom(d.customization);
+          alert("Resume loaded successfully!");
+        }catch{alert("Invalid JSON file.");}
+      };
+      r.readAsText(f);
+    };
+    inp.click();
+  };
+  const applyJSON=()=>{
+    try{
+      const d=JSON.parse(jsonText);
+      if(d.resume)update(n=>{Object.assign(n,d.resume);});
+      if(d.customization)setCustom(d.customization);
+      alert("Applied!");
+    }catch{alert("Invalid JSON.");}
+  };
+
+  const addSection=(type,title)=>{
+    const templates={
+      text:{id:uid(),title,type:"text",visible:true,content:""},
+      skills:{id:uid(),title,type:"skills",visible:true,items:[{id:uid(),label:"Category",value:"Skill 1, Skill 2",visible:true}]},
+      experience:{id:uid(),title,type:"experience",visible:true,items:[]},
+      projects:{id:uid(),title,type:"projects",visible:true,items:[]},
+      education:{id:uid(),title,type:"education",visible:true,items:[]},
+      publications:{id:uid(),title,type:"publications",visible:true,items:[]},
+      list:{id:uid(),title,type:"list",visible:true,items:[{id:uid(),text:"Item",source:"",url:"",visible:true}]},
+      custom:{id:uid(),title,type:"text",visible:true,content:""},
+    };
+    update(n=>{n.sections.push(templates[type]||templates.text);});
+    setAddModal(false);
+  };
+
+  return(
+    <div className="app">
+      <div className="toolbar">
+        <div className="logo">Resume<span>Forge</span></div>
+        <div className="sep"/>
+        <button className="tb-btn" onClick={undo} disabled={!canUndo} title="Undo (Ctrl+Z)">↩ Undo</button>
+        <button className="tb-btn" onClick={redo} disabled={!canRedo} title="Redo (Ctrl+Y)">↪ Redo</button>
+        <div className="sep"/>
+        <button className="tb-btn secondary" onClick={importJSON}>📂 Import</button>
+        <button className="tb-btn secondary" onClick={exportJSON}>💾 Save JSON</button>
+        <button className="tb-btn secondary" onClick={createCopy}>📋 Create Copy</button>
+        <div className="tr">
+          <button className="tb-btn primary" onClick={()=>window.print()}>🖨 Export PDF</button>
+        </div>
+      </div>
+      <div className="app-body">
+        <div className="left-panel">
+          <div className="panel-tabs">
+            <button className={`panel-tab${tab==="sections"?" active":""}`} onClick={()=>setTab("sections")}>Sections</button>
+            <button className={`panel-tab${tab==="customize"?" active":""}`} onClick={()=>setTab("customize")}>Customize</button>
+            <button className={`panel-tab${tab==="json"?" active":""}`} onClick={()=>setTab("json")}>JSON</button>
+          </div>
+          <div className="panel-content">
+            {tab==="sections"&&<SectionsTab resume={resume} update={update} onAddSection={()=>setAddModal(true)}/>}
+            {tab==="customize"&&<CustomizeTab custom={custom} setCustom={setCustom}/>}
+            {tab==="json"&&<JsonTab jsonText={jsonText} setJsonText={setJsonText} onApply={applyJSON}/>}
+          </div>
+        </div>
+        <div className="preview-area">
+          <div className="preview-scale-note">Live preview — Ctrl+Z to undo · Ctrl+Y to redo</div>
+          <div className="resume-paper">
+            <ResumePreview resume={resume} custom={custom}/>
+          </div>
+        </div>
+      </div>
+      {addModal&&<AddSectionModal onAdd={addSection} onClose={()=>setAddModal(false)}/>}
+    </div>
+  );
+}
+
+/* ======================== SECTIONS TAB ======================== */
+function SectionsTab({resume,update,onAddSection}){
+  const[expandedPersonal,setExpandedPersonal]=useState(false);
+  const[expanded,setExpanded]=useState({});
+  const toggle=id=>setExpanded(p=>({...p,[id]:!p[id]}));
+
+  return(
+    <div>
+      {/* Personal */}
+      <div className="section-row" style={{marginBottom:7,borderColor:expandedPersonal?"#e84393":"#eee"}}>
+        <div className="section-header" onClick={()=>setExpandedPersonal(v=>!v)}>
+          <span className="drag-icon">⠿</span>
+          <span style={{flex:1,fontSize:13,fontWeight:700,color:"#1a1a2e"}}>Personal Info</span>
+          <span className={`chevron${expandedPersonal?" open":""}`}>▼</span>
+        </div>
+        {expandedPersonal&&<div className="section-body"><EditPersonal resume={resume} update={update}/></div>}
+      </div>
+
+      {/* Sections */}
+      {resume.sections.map(sec=>(
+        <div key={sec.id} className={`section-row${expanded[sec.id]?" expanded":""}`}>
+          <div className="section-header">
+            <span className="drag-icon">⠿</span>
+            <button className={`eye-btn${sec.visible?"":" off"}`} onClick={e=>{e.stopPropagation();update(n=>{const s=n.sections.find(x=>x.id===sec.id);if(s)s.visible=!s.visible;});}}>
+              {sec.visible?"👁":"○"}
+            </button>
+            <input
+              className={`sec-title-input${sec.visible?"":" dimmed"}`}
+              value={sec.title}
+              onChange={e=>update(n=>{const s=n.sections.find(x=>x.id===sec.id);if(s)s.title=e.target.value;})}
+              onClick={e=>e.stopPropagation()}
+            />
+            <button className="del-btn" onClick={e=>{e.stopPropagation();if(confirm("Delete this section?"))update(n=>{n.sections=n.sections.filter(x=>x.id!==sec.id);});}} title="Delete section">✕</button>
+            <span className={`chevron${expanded[sec.id]?" open":""}`} onClick={()=>toggle(sec.id)}>▼</span>
+          </div>
+          {expanded[sec.id]&&(
+            <div className="section-body" onClick={e=>e.stopPropagation()}>
+              <SectionEditor sec={sec} update={update}/>
+            </div>
+          )}
+        </div>
+      ))}
+      <button className="add-section-btn" onClick={onAddSection}>+ Add New Section</button>
+    </div>
+  );
+}
+
+/* ======================== EDIT PERSONAL ======================== */
+function EditPersonal({resume,update}){
+  const p=resume.personal;
+  const upd=(field,val)=>update(n=>{n.personal[field]=val;});
+  const updLink=(id,field,val)=>update(n=>{const l=n.personal.links.find(x=>x.id===id);if(l)l[field]=val;});
+  return(
+    <div>
+      <div className="personal-block">
+        <div className="pblock-title">Basic Info</div>
+        <div className="fg"><label className="fl">Full Name</label><input className="fi" value={p.name} onChange={e=>upd("name",e.target.value)}/></div>
+        <div className="fg"><label className="fl">Professional Title</label><input className="fi" value={p.title} onChange={e=>upd("title",e.target.value)}/></div>
+        <div className="frow">
+          <div className="fg"><label className="fl">Email</label><input className="fi" value={p.email} onChange={e=>upd("email",e.target.value)}/></div>
+          <div className="fg"><label className="fl">Phone</label><input className="fi" value={p.phone} onChange={e=>upd("phone",e.target.value)}/></div>
+        </div>
+        <div className="fg"><label className="fl">Location</label><input className="fi" value={p.location} onChange={e=>upd("location",e.target.value)}/></div>
+      </div>
+      <div className="personal-block">
+        <div className="pblock-title">Links & Profiles</div>
+        {p.links.map(link=>(
+          <div key={link.id} className="link-row">
+            <button className={`eye-btn${link.visible?"":" off"}`} onClick={()=>updLink(link.id,"visible",!link.visible)}>{link.visible?"👁":"○"}</button>
+            <input className="fi" style={{width:"28%"}} placeholder="Label" value={link.label} onChange={e=>updLink(link.id,"label",e.target.value)}/>
+            <input className="fi" style={{flex:1}} placeholder="Display text" value={link.text} onChange={e=>updLink(link.id,"text",e.target.value)}/>
+            <input className="fi" style={{flex:1}} placeholder="URL" value={link.url} onChange={e=>updLink(link.id,"url",e.target.value)}/>
+            <button className="icon-btn" onClick={()=>update(n=>{n.personal.links=n.personal.links.filter(x=>x.id!==link.id);})}>✕</button>
+          </div>
+        ))}
+        <button className="add-btn" onClick={()=>update(n=>{n.personal.links.push({id:uid(),label:"Link",text:"",url:"",visible:true});})}>+ Add Link</button>
+      </div>
+    </div>
+  );
+}
+
+/* ======================== SECTION EDITOR (dispatcher) ======================== */
+function SectionEditor({sec,update}){
+  const upd=(fn)=>update(n=>{const s=n.sections.find(x=>x.id===sec.id);if(s)fn(s);});
+  if(sec.type==="text")return <EditText sec={sec} upd={upd}/>;
+  if(sec.type==="skills")return <EditSkills sec={sec} upd={upd}/>;
+  if(sec.type==="experience")return <EditExperience sec={sec} upd={upd}/>;
+  if(sec.type==="projects")return <EditProjects sec={sec} upd={upd}/>;
+  if(sec.type==="education")return <EditEducation sec={sec} upd={upd}/>;
+  if(sec.type==="publications")return <EditPublications sec={sec} upd={upd}/>;
+  if(sec.type==="list")return <EditList sec={sec} upd={upd}/>;
+  return <div style={{fontSize:12,color:"#888"}}>Unsupported type: {sec.type}</div>;
+}
+
+function EditText({sec,upd}){
+  return <div className="fg"><label className="fl">Content</label><textarea className="fta" style={{minHeight:100}} value={sec.content} onChange={e=>upd(s=>s.content=e.target.value)}/></div>;
+}
+
+function EditSkills({sec,upd}){
+  return(
+    <div>
+      {sec.items.map((item,i)=>(
+        <div key={item.id} className="skill-row">
+          <button className={`eye-btn${item.visible?"":" off"}`} onClick={()=>upd(s=>{s.items[i].visible=!s.items[i].visible;})}>{item.visible?"👁":"○"}</button>
+          <input className="sk-label" placeholder="Category" value={item.label} onChange={e=>upd(s=>{s.items[i].label=e.target.value;})}/>
+          <input className="sk-val" placeholder="Skills..." value={item.value} onChange={e=>upd(s=>{s.items[i].value=e.target.value;})}/>
+          <button className="icon-btn" onClick={()=>upd(s=>{s.items.splice(i,1);})}>✕</button>
+        </div>
+      ))}
+      <button className="add-btn" onClick={()=>upd(s=>{s.items.push({id:uid(),label:"",value:"",visible:true});})}>+ Add Skill Category</button>
+    </div>
+  );
+}
+
+function EditExperience({sec,upd}){
+  const[exp,setExp]=useState({});
+  return(
+    <div>
+      {sec.items.map((item,i)=>(
+        <div key={item.id} className="icard">
+          <div className="icard-hd" onClick={()=>setExp(p=>({...p,[item.id]:!p[item.id]}))}>
+            <button className={`eye-btn${item.visible?"":" off"}`} onClick={e=>{e.stopPropagation();upd(s=>{s.items[i].visible=!s.items[i].visible;});}}>{item.visible?"👁":"○"}</button>
+            <span style={{flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{item.title||"New Experience"}</span>
+            <button className="icon-btn" onClick={e=>{e.stopPropagation();upd(s=>{s.items.splice(i,1);});}}>✕</button>
+            <span className={`chevron${exp[item.id]?" open":""}`}>▼</span>
+          </div>
+          {exp[item.id]&&(
+            <div className="icard-body">
+              <div className="fg"><label className="fl">Job Title</label><input className="fi" value={item.title} onChange={e=>upd(s=>{s.items[i].title=e.target.value;})}/></div>
+              <div className="fg"><label className="fl">Company</label><input className="fi" value={item.company} onChange={e=>upd(s=>{s.items[i].company=e.target.value;})}/></div>
+              <div className="fg"><label className="fl">Company URL</label><input className="fi" placeholder="https://..." value={item.companyUrl||""} onChange={e=>upd(s=>{s.items[i].companyUrl=e.target.value;})}/></div>
+              <div className="frow">
+                <div className="fg"><label className="fl">Start Date</label><input className="fi" value={item.startDate} onChange={e=>upd(s=>{s.items[i].startDate=e.target.value;})}/></div>
+                <div className="fg"><label className="fl">End Date</label><input className="fi" value={item.endDate} onChange={e=>upd(s=>{s.items[i].endDate=e.target.value;})}/></div>
+              </div>
+              <div className="fg"><label className="fl">Location</label><input className="fi" value={item.location} onChange={e=>upd(s=>{s.items[i].location=e.target.value;})}/></div>
+              <div className="fg"><label className="fl">Bullet Points</label>
+                {item.bullets.map((b,bi)=>(
+                  <div key={b.id} className={`bullet-row${b.visible?"":" off"}`}>
+                    <button className="bicon-btn" onClick={()=>upd(s=>{s.items[i].bullets[bi].visible=!s.items[i].bullets[bi].visible;})}>{b.visible?"👁":"○"}</button>
+                    <textarea className="btext" value={b.text} rows={2} onChange={e=>upd(s=>{s.items[i].bullets[bi].text=e.target.value;})}/>
+                    <button className="bicon-btn" onClick={()=>upd(s=>{s.items[i].bullets.splice(bi,1);})}>✕</button>
+                  </div>
+                ))}
+                <button className="add-btn" onClick={()=>upd(s=>{s.items[i].bullets.push({id:uid(),text:"",visible:true});})}>+ Add Bullet</button>
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+      <button className="add-btn" onClick={()=>upd(s=>{s.items.push({id:uid(),title:"New Position",company:"",companyUrl:"",startDate:"",endDate:"",location:"",visible:true,bullets:[]});})}>+ Add Experience</button>
+    </div>
+  );
+}
+
+function EditProjects({sec,upd}){
+  const[exp,setExp]=useState({});
+  return(
+    <div>
+      {sec.items.map((item,i)=>(
+        <div key={item.id} className="icard">
+          <div className="icard-hd" onClick={()=>setExp(p=>({...p,[item.id]:!p[item.id]}))}>
+            <button className={`eye-btn${item.visible?"":" off"}`} onClick={e=>{e.stopPropagation();upd(s=>{s.items[i].visible=!s.items[i].visible;});}}>{item.visible?"👁":"○"}</button>
+            <span style={{flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{item.title||"New Project"}</span>
+            <button className="icon-btn" onClick={e=>{e.stopPropagation();upd(s=>{s.items.splice(i,1);});}}>✕</button>
+            <span className={`chevron${exp[item.id]?" open":""}`}>▼</span>
+          </div>
+          {exp[item.id]&&(
+            <div className="icard-body">
+              <div className="fg"><label className="fl">Project Title</label><input className="fi" value={item.title} onChange={e=>upd(s=>{s.items[i].title=e.target.value;})}/></div>
+              <div className="fg"><label className="fl">Subtitle / Type</label><input className="fi" value={item.subtitle||""} onChange={e=>upd(s=>{s.items[i].subtitle=e.target.value;})}/></div>
+              <div className="fg"><label className="fl">URL (optional)</label><input className="fi" placeholder="https://..." value={item.url||""} onChange={e=>upd(s=>{s.items[i].url=e.target.value;})}/></div>
+              <div className="fg"><label className="fl">Bullet Points</label>
+                {item.bullets.map((b,bi)=>(
+                  <div key={b.id} className={`bullet-row${b.visible?"":" off"}`}>
+                    <button className="bicon-btn" onClick={()=>upd(s=>{s.items[i].bullets[bi].visible=!s.items[i].bullets[bi].visible;})}>{b.visible?"👁":"○"}</button>
+                    <textarea className="btext" value={b.text} rows={2} onChange={e=>upd(s=>{s.items[i].bullets[bi].text=e.target.value;})}/>
+                    <button className="bicon-btn" onClick={()=>upd(s=>{s.items[i].bullets.splice(bi,1);})}>✕</button>
+                  </div>
+                ))}
+                <button className="add-btn" onClick={()=>upd(s=>{s.items[i].bullets.push({id:uid(),text:"",visible:true});})}>+ Add Bullet</button>
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+      <button className="add-btn" onClick={()=>upd(s=>{s.items.push({id:uid(),title:"New Project",subtitle:"",url:"",visible:true,bullets:[]});})}>+ Add Project</button>
+    </div>
+  );
+}
+
+function EditEducation({sec,upd}){
+  const[exp,setExp]=useState({});
+  return(
+    <div>
+      {sec.items.map((item,i)=>(
+        <div key={item.id} className="icard">
+          <div className="icard-hd" onClick={()=>setExp(p=>({...p,[item.id]:!p[item.id]}))}>
+            <button className={`eye-btn${item.visible?"":" off"}`} onClick={e=>{e.stopPropagation();upd(s=>{s.items[i].visible=!s.items[i].visible;});}}>{item.visible?"👁":"○"}</button>
+            <span style={{flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{item.degree||"New Degree"}</span>
+            <button className="icon-btn" onClick={e=>{e.stopPropagation();upd(s=>{s.items.splice(i,1);});}}>✕</button>
+            <span className={`chevron${exp[item.id]?" open":""}`}>▼</span>
+          </div>
+          {exp[item.id]&&(
+            <div className="icard-body">
+              <div className="fg"><label className="fl">Degree</label><input className="fi" value={item.degree} onChange={e=>upd(s=>{s.items[i].degree=e.target.value;})}/></div>
+              <div className="fg"><label className="fl">School / University</label><input className="fi" value={item.school} onChange={e=>upd(s=>{s.items[i].school=e.target.value;})}/></div>
+              <div className="fg"><label className="fl">School URL</label><input className="fi" placeholder="https://..." value={item.schoolUrl||""} onChange={e=>upd(s=>{s.items[i].schoolUrl=e.target.value;})}/></div>
+              <div className="frow">
+                <div className="fg"><label className="fl">Start Date</label><input className="fi" value={item.startDate} onChange={e=>upd(s=>{s.items[i].startDate=e.target.value;})}/></div>
+                <div className="fg"><label className="fl">End Date</label><input className="fi" value={item.endDate} onChange={e=>upd(s=>{s.items[i].endDate=e.target.value;})}/></div>
+              </div>
+              <div className="fg"><label className="fl">Location</label><input className="fi" value={item.location} onChange={e=>upd(s=>{s.items[i].location=e.target.value;})}/></div>
+              <div className="fg"><label className="fl">Description (optional)</label><textarea className="fta" value={item.description||""} onChange={e=>upd(s=>{s.items[i].description=e.target.value;})}/></div>
+            </div>
+          )}
+        </div>
+      ))}
+      <button className="add-btn" onClick={()=>upd(s=>{s.items.push({id:uid(),degree:"",school:"",schoolUrl:"",startDate:"",endDate:"",location:"",description:"",visible:true});})}>+ Add Education</button>
+    </div>
+  );
+}
+
+function EditPublications({sec,upd}){
+  return(
+    <div>
+      {sec.items.map((item,i)=>(
+        <div key={item.id} className="icard" style={{marginTop:6}}>
+          <div className="icard-body">
+            <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
+              <button className={`eye-btn${item.visible?"":" off"}`} onClick={()=>upd(s=>{s.items[i].visible=!s.items[i].visible;})}>{item.visible?"👁":"○"}</button>
+              <strong style={{fontSize:12,flex:1}}>Publication {i+1}</strong>
+              <button className="icon-btn" onClick={()=>upd(s=>{s.items.splice(i,1);})}>✕</button>
+            </div>
+            <div className="fg"><label className="fl">Title</label><input className="fi" value={item.title} onChange={e=>upd(s=>{s.items[i].title=e.target.value;})}/></div>
+            <div className="frow">
+              <div className="fg"><label className="fl">Publisher</label><input className="fi" value={item.publisher} onChange={e=>upd(s=>{s.items[i].publisher=e.target.value;})}/></div>
+              <div className="fg"><label className="fl">Date</label><input className="fi" value={item.date} onChange={e=>upd(s=>{s.items[i].date=e.target.value;})}/></div>
+            </div>
+            <div className="fg"><label className="fl">URL</label><input className="fi" placeholder="https://..." value={item.url||""} onChange={e=>upd(s=>{s.items[i].url=e.target.value;})}/></div>
+          </div>
+        </div>
+      ))}
+      <button className="add-btn" onClick={()=>upd(s=>{s.items.push({id:uid(),title:"",publisher:"",date:"",url:"",visible:true});})}>+ Add Publication</button>
+    </div>
+  );
+}
+
+function EditList({sec,upd}){
+  return(
+    <div>
+      {sec.items.map((item,i)=>(
+        <div key={item.id} className="list-row">
+          <button className={`eye-btn${item.visible?"":" off"}`} onClick={()=>upd(s=>{s.items[i].visible=!s.items[i].visible;})}>{item.visible?"👁":"○"}</button>
+          <input className="fi" style={{flex:1.5}} placeholder="Title / Name" value={item.text} onChange={e=>upd(s=>{s.items[i].text=e.target.value;})}/>
+          <input className="fi" style={{flex:1}} placeholder="Source" value={item.source||""} onChange={e=>upd(s=>{s.items[i].source=e.target.value;})}/>
+          <input className="fi" style={{flex:1}} placeholder="URL" value={item.url||""} onChange={e=>upd(s=>{s.items[i].url=e.target.value;})}/>
+          <button className="icon-btn" onClick={()=>upd(s=>{s.items.splice(i,1);})}>✕</button>
+        </div>
+      ))}
+      <button className="add-btn" onClick={()=>upd(s=>{s.items.push({id:uid(),text:"",source:"",url:"",visible:true});})}>+ Add Item</button>
+    </div>
+  );
+}
+
+/* ======================== CUSTOMIZE TAB ======================== */
+function CustomizeTab({custom,setCustom}){
+  const set=(k,v)=>setCustom(p=>({...p,[k]:v}));
+  return(
+    <div>
+      <div className="cust-section">
+        <div className="cust-title">Typography</div>
+        <div className="cust-row">
+          <label>Font Family</label>
+          <select className="cust-select" value={custom.fontFamily} onChange={e=>set("fontFamily",e.target.value)}>
+            {FONTS.map(f=><option key={f} value={f}>{f}</option>)}
+          </select>
+        </div>
+        <div className="cust-row">
+          <label>Base Font Size</label>
+          <input type="range" min={8} max={13} step={0.5} value={custom.fontSize} onChange={e=>set("fontSize",+e.target.value)}/>
+          <span>{custom.fontSize}pt</span>
+        </div>
+        <div className="cust-row">
+          <label>Name Size</label>
+          <input type="range" min={18} max={38} step={1} value={custom.nameSize} onChange={e=>set("nameSize",+e.target.value)}/>
+          <span>{custom.nameSize}pt</span>
+        </div>
+        <div className="cust-row">
+          <label>Title Size</label>
+          <input type="range" min={9} max={16} step={0.5} value={custom.titleSize} onChange={e=>set("titleSize",+e.target.value)}/>
+          <span>{custom.titleSize}pt</span>
+        </div>
+        <div className="cust-row">
+          <label>Heading Size</label>
+          <input type="range" min={9} max={16} step={0.5} value={custom.headingSize} onChange={e=>set("headingSize",+e.target.value)}/>
+          <span>{custom.headingSize}pt</span>
+        </div>
+        <div className="cust-row">
+          <label>Line Height</label>
+          <input type="range" min={1.1} max={2} step={0.05} value={custom.lineHeight} onChange={e=>set("lineHeight",+e.target.value)}/>
+          <span>{custom.lineHeight.toFixed(2)}</span>
+        </div>
+      </div>
+      <div className="cust-section">
+        <div className="cust-title">Page Layout</div>
+        <div className="cust-row">
+          <label>Horizontal Margin</label>
+          <input type="range" min={8} max={45} step={1} value={custom.marginX} onChange={e=>set("marginX",+e.target.value)}/>
+          <span>{custom.marginX}mm</span>
+        </div>
+        <div className="cust-row">
+          <label>Vertical Margin</label>
+          <input type="range" min={8} max={40} step={1} value={custom.marginY} onChange={e=>set("marginY",+e.target.value)}/>
+          <span>{custom.marginY}mm</span>
+        </div>
+      </div>
+      <div className="cust-section">
+        <div className="cust-title">Colors</div>
+        <div className="cust-row"><label>Name Color</label><input type="color" className="color-dot" value={custom.nameColor} onChange={e=>set("nameColor",e.target.value)}/></div>
+        <div className="cust-row"><label>Accent / Heading</label><input type="color" className="color-dot" value={custom.accentColor} onChange={e=>set("accentColor",e.target.value)}/></div>
+        <div className="cust-row"><label>Section Line</label><input type="color" className="color-dot" value={custom.sectionLineColor} onChange={e=>set("sectionLineColor",e.target.value)}/></div>
+        <div className="cust-row"><label>Link Color</label><input type="color" className="color-dot" value={custom.linkColor} onChange={e=>set("linkColor",e.target.value)}/></div>
+        <div className="cust-row"><label>Date Color</label><input type="color" className="color-dot" value={custom.dateColor} onChange={e=>set("dateColor",e.target.value)}/></div>
+        <div className="cust-row"><label>Body Text Color</label><input type="color" className="color-dot" value={custom.bulletColor} onChange={e=>set("bulletColor",e.target.value)}/></div>
+      </div>
+      <div className="cust-section">
+        <div className="cust-title">Section Heading Style</div>
+        <div className="cust-row">
+          <label>Heading Weight</label>
+          <select className="cust-select" value={custom.headingWeight} onChange={e=>set("headingWeight",e.target.value)}>
+            <option value="400">Regular</option>
+            <option value="500">Medium</option>
+            <option value="600">Semibold</option>
+            <option value="700">Bold</option>
+            <option value="800">Extrabold</option>
+          </select>
+        </div>
+      </div>
+      <button className="add-btn" style={{marginTop:8}} onClick={()=>setCustom(DFLT_CUSTOM)}>↺ Reset to Defaults</button>
+    </div>
+  );
+}
+
+/* ======================== JSON TAB ======================== */
+function JsonTab({jsonText,setJsonText,onApply}){
+  return(
+    <div>
+      <p style={{fontSize:12,color:"#888",marginBottom:8}}>Edit the JSON below and click Apply to update your resume, or use Export to save.</p>
+      <textarea className="json-ta" value={jsonText} onChange={e=>setJsonText(e.target.value)}/>
+      <button className="btn pink" style={{width:"100%",marginTop:8,padding:9}} onClick={onApply}>Apply JSON Changes</button>
+    </div>
+  );
+}
+
+/* ======================== ADD SECTION MODAL ======================== */
+function AddSectionModal({onAdd,onClose}){
+  const[title,setTitle]=useState("New Section");
+  const[type,setType]=useState("text");
+  const types=[
+    {v:"text",l:"Text / Paragraph"},
+    {v:"skills",l:"Skills"},
+    {v:"experience",l:"Work Experience"},
+    {v:"projects",l:"Projects"},
+    {v:"education",l:"Education"},
+    {v:"publications",l:"Publications"},
+    {v:"list",l:"List (Certifications etc.)"},
+    {v:"custom",l:"Custom (Free-form)"},
+  ];
+  return(
+    <div className="overlay" onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+      <div className="modal">
+        <div className="modal-title">Add New Section</div>
+        <div className="fg"><label className="fl">Section Title</label><input className="fi" value={title} onChange={e=>setTitle(e.target.value)} autoFocus/></div>
+        <div className="fg"><label className="fl">Section Type</label>
+          <select className="fi" value={type} onChange={e=>setType(e.target.value)}>
+            {types.map(t=><option key={t.v} value={t.v}>{t.l}</option>)}
+          </select>
+        </div>
+        <div className="modal-actions">
+          <button className="btn ghost" onClick={onClose}>Cancel</button>
+          <button className="btn pink" onClick={()=>onAdd(type,title)}>Add Section</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ======================== RESUME PREVIEW ======================== */
+function ResumePreview({resume,custom}){
+  const px=n=>n*1.3333;
+  const C=custom;
+  const mm=n=>`${n*3.7795}px`;
+
+  const style={
+    fontFamily:`'${C.fontFamily}',serif`,
+    fontSize:px(C.fontSize)+"px",
+    lineHeight:C.lineHeight,
+    padding:`${mm(C.marginY)} ${mm(C.marginX)}`,
+    color:C.bulletColor,
+  };
+
+  const p=resume.personal;
+
+  return(
+    <div style={style}>
+      {/* Header */}
+      <div style={{marginBottom:"14px"}}>
+        <div style={{fontSize:px(C.nameSize)+"px",fontWeight:800,color:C.nameColor,letterSpacing:"-0.5px",lineHeight:1.1}}>{p.name}</div>
+        {p.title&&<div style={{fontSize:px(C.titleSize)+"px",color:C.dateColor,marginTop:"3px",fontWeight:500}}>{p.title}</div>}
+        <div style={{display:"flex",flexWrap:"wrap",gap:"3px 12px",marginTop:"5px",fontSize:px(C.fontSize-0.5)+"px",color:C.dateColor}}>
+          {p.email&&<span>✉ {p.email}</span>}
+          {p.phone&&<span>📞 {p.phone}</span>}
+          {p.location&&<span>📍 {p.location}</span>}
+          {p.links.filter(l=>l.visible&&l.text).map(l=>(
+            <span key={l.id}>
+              {l.url?<a href={l.url} style={{color:C.linkColor,textDecoration:"none"}}>{l.text}</a>:l.text}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Sections */}
+      {resume.sections.filter(s=>s.visible).map(s=>(
+        <div key={s.id} style={{marginBottom:"10px"}}>
+          <div style={{
+            display:"flex",alignItems:"center",gap:"8px",marginBottom:"5px"
+          }}>
+            <div style={{
+              fontSize:px(C.headingSize)+"px",fontWeight:C.headingWeight,
+              color:C.accentColor,textTransform:"uppercase",letterSpacing:"1px",
+              whiteSpace:"nowrap"
+            }}>{s.title}</div>
+            <div style={{flex:1,height:"1.5px",background:C.sectionLineColor,opacity:.9}}/>
+          </div>
+          <SectionPreview sec={s} custom={C} px={px}/>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SectionPreview({sec,custom:C,px}){
+  if(sec.type==="text")return(
+    <div style={{fontSize:px(C.fontSize)+"px",lineHeight:C.lineHeight,color:C.bulletColor}}>{sec.content}</div>
+  );
+  if(sec.type==="skills")return(
+    <div style={{fontSize:px(C.fontSize)+"px"}}>
+      {sec.items.filter(i=>i.visible).map(i=>(
+        <div key={i.id} style={{display:"flex",marginBottom:"1.5px"}}>
+          <span style={{fontWeight:700,color:C.accentColor,minWidth:"160px",flexShrink:0}}>{i.label}</span>
+          <span style={{color:C.bulletColor}}> — {i.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+  if(sec.type==="experience")return(
+    <div>
+      {sec.items.filter(i=>i.visible).map(i=>(
+        <div key={i.id} style={{marginBottom:"8px"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
+            <div>
+              <span style={{fontWeight:700,fontSize:px(C.fontSize+0.5)+"px",color:C.accentColor}}>{i.title}</span>
+              {i.company&&<span style={{color:C.bulletColor}}>, {
+                i.companyUrl?<a href={i.companyUrl} style={{color:C.linkColor,textDecoration:"none"}}>{i.company}</a>:i.company
+              }</span>}
+            </div>
+            <span style={{fontSize:px(C.fontSize-0.5)+"px",color:C.dateColor,whiteSpace:"nowrap",marginLeft:"8px"}}>
+              {i.startDate}{i.endDate?` – ${i.endDate}`:""}{i.location?` | ${i.location}`:""}
+            </span>
+          </div>
+          <ul style={{marginLeft:"14px",marginTop:"2px"}}>
+            {i.bullets.filter(b=>b.visible).map(b=>(
+              <li key={b.id} style={{fontSize:px(C.fontSize)+"px",lineHeight:C.lineHeight,color:C.bulletColor}}>{b.text}</li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  );
+  if(sec.type==="projects")return(
+    <div>
+      {sec.items.filter(i=>i.visible).map(i=>(
+        <div key={i.id} style={{marginBottom:"7px"}}>
+          <div style={{fontWeight:700,fontSize:px(C.fontSize+0.5)+"px",color:C.accentColor}}>
+            {i.url?<a href={i.url} style={{color:C.accentColor,textDecoration:"none"}}>{i.title}</a>:i.title}
+            {i.subtitle&&<span style={{fontWeight:400,color:C.dateColor,fontSize:px(C.fontSize)+"px"}}>, {i.subtitle}</span>}
+          </div>
+          <ul style={{marginLeft:"14px",marginTop:"2px"}}>
+            {i.bullets.filter(b=>b.visible).map(b=>(
+              <li key={b.id} style={{fontSize:px(C.fontSize)+"px",lineHeight:C.lineHeight,color:C.bulletColor}}>{b.text}</li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  );
+  if(sec.type==="education")return(
+    <div>
+      {sec.items.filter(i=>i.visible).map(i=>(
+        <div key={i.id} style={{marginBottom:"5px",display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
+          <div>
+            <span style={{fontWeight:700,color:C.accentColor,fontSize:px(C.fontSize+0.5)+"px"}}>{i.degree}</span>
+            {i.school&&<span style={{color:C.bulletColor}}>, {
+              i.schoolUrl?<a href={i.schoolUrl} style={{color:C.linkColor,textDecoration:"none"}}>{i.school}</a>:i.school
+            }</span>}
+            {i.description&&<div style={{fontSize:px(C.fontSize)+"px",marginTop:"1px",color:C.bulletColor}}>{i.description}</div>}
+          </div>
+          <span style={{fontSize:px(C.fontSize-0.5)+"px",color:C.dateColor,whiteSpace:"nowrap",marginLeft:"8px"}}>
+            {i.startDate}{i.endDate?` – ${i.endDate}`:""}{i.location?` | ${i.location}`:""}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+  if(sec.type==="publications")return(
+    <div>
+      {sec.items.filter(i=>i.visible).map(i=>(
+        <div key={i.id} style={{marginBottom:"4px",fontSize:px(C.fontSize)+"px"}}>
+          <span style={{fontWeight:600,color:C.accentColor}}>
+            {i.url?<a href={i.url} style={{color:C.accentColor,textDecoration:"none"}}>{i.title}</a>:i.title}
+          </span>
+          {i.publisher&&<span style={{color:C.dateColor}}> — {i.publisher}</span>}
+          {i.date&&<span style={{color:C.dateColor}}>, {i.date}</span>}
+        </div>
+      ))}
+    </div>
+  );
+  if(sec.type==="list")return(
+    <div style={{columns:2,columnGap:"20px",fontSize:px(C.fontSize)+"px"}}>
+      {sec.items.filter(i=>i.visible).map(i=>(
+        <div key={i.id} style={{breakInside:"avoid",marginBottom:"2px"}}>
+          • {i.url?<a href={i.url} style={{color:C.linkColor,textDecoration:"none"}}>{i.text}</a>:i.text}
+          {i.source&&<span style={{color:C.dateColor}}> ({i.source})</span>}
+        </div>
+      ))}
+    </div>
+  );
+  return <div style={{color:"#888",fontSize:"12px"}}>[{sec.type} section]</div>;
+}
+
+/* ======================== RENDER ======================== */
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
