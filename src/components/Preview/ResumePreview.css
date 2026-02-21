@@ -26,8 +26,33 @@
     font-size: var(--font-size);
     line-height: var(--line-height);
     color: var(--color);
+    /* ensure at least one page height for preview and allow page-boundary lines */
+    min-height: 1123px; /* ~297mm at 3.7795px/mm */
+    position: relative; /* container for absolute lines */
 }
 
+.page-break-line {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: rgba(0,0,0,0.25);
+}
+
+/* show faint page boundaries in the on‑screen preview so users can see
+   when the resume will span multiple pages */
+@media screen {
+    .resume-paper {
+        background-image: repeating-linear-gradient(
+            to bottom,
+            transparent,
+            transparent 1122px,
+            rgba(0,0,0,0.1) 1122px,
+            rgba(0,0,0,0.1) 1123px
+        );
+        background-size: 100% 1123px;
+    }
+}
 /* header */
 .resume-header {
     margin-bottom: 14px;
@@ -89,10 +114,21 @@
 }
 
 .section-rule {
+    /* use background for screen and border for print so underline always appears
+       even when the user disables printing of background colors */
     height: 1.5px;
     background: var(--section-line-color);
     opacity: .9;
     margin-bottom: 6px;
+}
+
+@media print {
+    .section-rule {
+        background: none !important;
+        border-bottom: 1.5px solid var(--section-line-color) !important;
+        opacity: 1 !important;
+        margin-bottom: 6px;
+    }
 }
 
 /* text section */
@@ -259,13 +295,19 @@
 
 /* list */
 .sec-list {
-    columns: 2;
-    column-gap: 20px;
+    /* use semantic <ul> for bullets and don’t split into columns; each li is one line */
+    columns: 1;
     font-size: var(--font-size);
 }
 
+.sec-list ul {
+    margin: 0;
+    padding-left: 16px;
+    list-style-type: disc;
+}
+
 .list-item {
-    break-inside: avoid;
+    /* spacing handled by the ul/ol element; keep a small bottom margin */
     margin-bottom: 2px;
 }
 

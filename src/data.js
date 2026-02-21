@@ -101,8 +101,8 @@ export const INIT = {
       items: [
         {
           id: "e1",
-          title: "Sr. Software Engineer",
-          company: "Corestrat (Working for ACI Logistix, a logistics firm)",
+          title: "Senior Software Engineer",
+          company: "Corestrat (Client: ACI Logistix, a logistics firm)",
           companyUrl: "",
           startDate: "Sep 2025",
           endDate: "Present",
@@ -134,7 +134,7 @@ export const INIT = {
         {
           id: "e2",
           title: "Software Engineer",
-          company: "Corestrat (Working for ACI Logistix, a logistics firm)",
+          company: "Corestrat (Client: ACI Logistix, a logistics firm)",
           companyUrl: "",
           startDate: "Sep 2022",
           endDate: "Aug 2025",
@@ -329,7 +329,7 @@ export const INIT = {
           title: "CI/CD Pipeline for Database & SQL Object Versioning",
           subtitle: "Automating SQL Object Deployment with Version Control",
           url: "",
-          visible: false,
+          visible: true,
           bullets: [
             {
               id: "pb15",
@@ -353,7 +353,7 @@ export const INIT = {
           title: "SSFPriority",
           subtitle: "Postage Calculation Optimization",
           url: "",
-          visible: false,
+          visible: true,
           bullets: [
             {
               id: "pb18",
@@ -427,16 +427,16 @@ export const INIT = {
       visible: true,
       items: [
         {
-          id: "c1",
-          text: "Python And Django Framework For Beginners",
-          source: "Udemy",
+          id: "c2",
+          text: "AWS Academy Cloud Foundations",
+          source: "AWS",
           url: "",
           visible: true,
         },
         {
-          id: "c2",
-          text: "AWS Academy Cloud Foundations",
-          source: "AWS",
+          id: "c1",
+          text: "Python And Django Framework For Beginners",
+          source: "Udemy",
           url: "",
           visible: true,
         },
@@ -452,14 +452,14 @@ export const INIT = {
           text: "The Complete 2022 Web Development Bootcamp",
           source: "Udemy",
           url: "",
-          visible: true,
+          visible: false,
         },
         {
           id: "c5",
           text: "Java Programming: Solving Problems with Software",
           source: "Coursera",
           url: "",
-          visible: true,
+          visible: false,
         },
         {
           id: "c6",
@@ -483,19 +483,19 @@ export const INIT = {
 export const DFLT_CUSTOM = {
   fontFamily: "DM Sans",
   fontSize: 10,
-  nameSize: 24,
-  titleSize: 18,
+  nameSize: 30,
+  titleSize: 20,
   headingSize: 11.5,
   lineHeight: 1.45,
   bulletMargin: 12,
   marginX: 12,
   marginY: 12,
-  accentColor: "#1e293b",
+  accentColor: "#0b111b",
   linkColor: "#042062",
-  sectionLineColor: "#1e293b",
+  sectionLineColor: "#161e2b",
   nameColor: "#000000",
   dateColor: "#1c2127",
-  bulletColor: "#374151",
+  bulletColor: "#1a1f28",
   headingWeight: "700",
 };
 
